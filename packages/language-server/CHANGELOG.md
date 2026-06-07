@@ -1,5 +1,12 @@
 # @react-doctor/language-server
 
+## 0.2.13
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @react-doctor/core@0.3.1
+
 ## 0.2.12
 
 ### Patch Changes
