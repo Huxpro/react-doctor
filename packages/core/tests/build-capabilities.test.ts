@@ -194,4 +194,28 @@ describe("buildCapabilities", () => {
     expect(capabilities.has("zod")).toBe(true);
     expect(capabilities.has("zod:4")).toBe(false);
   });
+
+  it("emits a `reactlynx` capability for ReactLynx projects without `react-native`", () => {
+    const capabilities = buildCapabilities({
+      ...baseProject,
+      framework: "reactlynx",
+      hasReactNativeWorkspace: false,
+      expoVersion: null,
+    });
+    expect(capabilities.has("reactlynx")).toBe(true);
+    expect(capabilities.has("react-native"), "ReactLynx alone must not enable RN rules").toBe(
+      false,
+    );
+    expect(capabilities.has("expo"), "ReactLynx alone must not enable Expo rules").toBe(false);
+  });
+
+  it("enables `react-native` for a ReactLynx project that also declares RN in a workspace", () => {
+    const capabilities = buildCapabilities({
+      ...baseProject,
+      framework: "reactlynx",
+      hasReactNativeWorkspace: true,
+    });
+    expect(capabilities.has("reactlynx")).toBe(true);
+    expect(capabilities.has("react-native")).toBe(true);
+  });
 });

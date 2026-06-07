@@ -71,6 +71,22 @@ describe("checkReactNativeProject — gating", () => {
       checkReactNativeProject(projectDirectory, buildRnProject(projectDirectory, "vite")),
     ).toEqual([]);
   });
+
+  it("emits nothing for a ReactLynx project even with an RN-shaped babel.config.js", () => {
+    const projectDirectory = makeProjectDirectory();
+    writePackageJson(projectDirectory, {
+      name: "lynx-app",
+      dependencies: { "@lynx-js/react": "^0.121.0", react: "^18.3.1" },
+    });
+    writeFile(
+      projectDirectory,
+      "babel.config.js",
+      `module.exports = { presets: ['module:metro-react-native-babel-preset'] };`,
+    );
+    expect(
+      checkReactNativeProject(projectDirectory, buildRnProject(projectDirectory, "reactlynx")),
+    ).toEqual([]);
+  });
 });
 
 describe("checkReactNativeProject — legacy metro babel preset", () => {

@@ -1,0 +1,12 @@
+{
+  "name": "test-reactlynx-app",
+  "private": true,
+  "dependencies": {
+    "@lynx-js/react": "^0.121.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@lynx-js/react-rsbuild-plugin": "^0.16.0",
+    "@lynx-js/rspeedy": "^0.14.0"
+  }
+}

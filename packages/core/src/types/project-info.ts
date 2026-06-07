@@ -6,6 +6,7 @@ export type Framework =
   | "gatsby"
   | "expo"
   | "react-native"
+  | "reactlynx"
   | "tanstack-start"
   | "preact"
   | "unknown";

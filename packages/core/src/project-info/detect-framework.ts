@@ -8,6 +8,10 @@ const FRAMEWORK_PACKAGES: Record<string, Framework> = {
   "@remix-run/react": "remix",
   gatsby: "gatsby",
   expo: "expo",
+  // `@lynx-js/react` is matched before `react-native` so a project
+  // declaring both classifies as `reactlynx` rather than the more
+  // generic React Native bucket.
+  "@lynx-js/react": "reactlynx",
   "react-native": "react-native",
 };
 
@@ -20,6 +24,7 @@ const FRAMEWORK_DISPLAY_NAMES: Record<Framework, string> = {
   gatsby: "Gatsby",
   expo: "Expo",
   "react-native": "React Native",
+  reactlynx: "ReactLynx",
   preact: "Preact",
   unknown: "React",
 };

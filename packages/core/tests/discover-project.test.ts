@@ -1426,6 +1426,10 @@ describe("formatFrameworkName", () => {
   it("formats Preact", () => {
     expect(formatFrameworkName("preact")).toBe("Preact");
   });
+
+  it("formats ReactLynx", () => {
+    expect(formatFrameworkName("reactlynx")).toBe("ReactLynx");
+  });
 });
 
 describe("discoverProject — Preact", () => {
@@ -1497,6 +1501,105 @@ describe("discoverProject — Preact", () => {
     const projectInfo = discoverProject(projectDirectory);
     expect(projectInfo.preactVersion).toBe(null);
     expect(projectInfo.preactMajorVersion).toBe(null);
+  });
+});
+
+describe("discoverProject — ReactLynx", () => {
+  it("classifies an @lynx-js/react project as `reactlynx`", () => {
+    const projectInfo = discoverProject(path.join(FIXTURES_DIRECTORY, "reactlynx-app"));
+    expect(projectInfo.framework).toBe("reactlynx");
+    expect(projectInfo.hasTypeScript).toBe(true);
+  });
+
+  it("does not classify a ReactLynx app as react-native or expo", () => {
+    const projectInfo = discoverProject(path.join(FIXTURES_DIRECTORY, "reactlynx-app"));
+    expect(projectInfo.hasReactNativeWorkspace).toBe(false);
+    expect(projectInfo.expoVersion).toBe(null);
+  });
+
+  it("detects ReactLynx even when declared only in devDependencies", () => {
+    const projectDirectory = path.join(tempDirectory, "reactlynx-dev-deps");
+    fs.mkdirSync(projectDirectory, { recursive: true });
+    fs.writeFileSync(
+      path.join(projectDirectory, "package.json"),
+      JSON.stringify({
+        name: "reactlynx-dev-deps",
+        devDependencies: { "@lynx-js/react": "^0.121.0" },
+      }),
+    );
+
+    const projectInfo = discoverProject(projectDirectory);
+    expect(projectInfo.framework).toBe("reactlynx");
+  });
+
+  it("flags a web-rooted monorepo with a ReactLynx workspace as a ReactLynx project", () => {
+    const rootDirectory = path.join(tempDirectory, "reactlynx-workspace-monorepo");
+    const lynxDirectory = path.join(rootDirectory, "apps", "lynx");
+    fs.mkdirSync(lynxDirectory, { recursive: true });
+    fs.writeFileSync(
+      path.join(rootDirectory, "package.json"),
+      JSON.stringify({
+        name: "monorepo-root",
+        workspaces: ["apps/*"],
+      }),
+    );
+    fs.writeFileSync(
+      path.join(lynxDirectory, "package.json"),
+      JSON.stringify({
+        name: "lynx-app",
+        dependencies: { "@lynx-js/react": "^0.121.0", react: "^18.3.1" },
+      }),
+    );
+
+    const projectInfo = discoverProject(rootDirectory);
+    expect(projectInfo.framework).toBe("reactlynx");
+  });
+
+  it("keeps RN/Expo signals false on a ReactLynx project without RN/Expo deps", () => {
+    const projectDirectory = path.join(tempDirectory, "reactlynx-no-rn");
+    fs.mkdirSync(projectDirectory, { recursive: true });
+    fs.writeFileSync(
+      path.join(projectDirectory, "package.json"),
+      JSON.stringify({
+        name: "reactlynx-no-rn",
+        dependencies: { "@lynx-js/react": "^0.121.0", react: "^18.3.1" },
+      }),
+    );
+
+    const projectInfo = discoverProject(projectDirectory);
+    expect(projectInfo.hasReactNativeWorkspace).toBe(false);
+    expect(projectInfo.expoVersion).toBe(null);
+    expect(projectInfo.hasReanimated).toBe(false);
+  });
+
+  it("discoverReactSubprojects finds a ReactLynx workspace package", () => {
+    const rootDirectory = path.join(tempDirectory, "reactlynx-subprojects");
+    const lynxDirectory = path.join(rootDirectory, "apps", "lynx");
+    const webDirectory = path.join(rootDirectory, "apps", "web");
+    fs.mkdirSync(lynxDirectory, { recursive: true });
+    fs.mkdirSync(webDirectory, { recursive: true });
+    fs.writeFileSync(
+      path.join(rootDirectory, "package.json"),
+      JSON.stringify({ name: "root", workspaces: ["apps/*"] }),
+    );
+    fs.writeFileSync(
+      path.join(lynxDirectory, "package.json"),
+      JSON.stringify({
+        name: "lynx-app",
+        dependencies: { "@lynx-js/react": "^0.121.0" },
+      }),
+    );
+    fs.writeFileSync(
+      path.join(webDirectory, "package.json"),
+      JSON.stringify({
+        name: "web-app",
+        dependencies: { react: "^19.0.0", "react-dom": "^19.0.0" },
+      }),
+    );
+
+    const packages = discoverReactSubprojects(rootDirectory);
+    const packageNames = packages.map((entry) => entry.name).toSorted();
+    expect(packageNames).toEqual(["lynx-app", "web-app"]);
   });
 });
 
