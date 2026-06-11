@@ -50,6 +50,7 @@ export const noNoninteractiveElementToInteractiveRole = defineRule<Rule>({
   id: "no-noninteractive-element-to-interactive-role",
   title: "Noninteractive element given interactive role",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation:
     "Use a real interactive element instead of adding an interactive role to a static one.",

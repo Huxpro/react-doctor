@@ -40,6 +40,7 @@ export const noNoninteractiveTabindex = defineRule<Rule>({
   id: "no-noninteractive-tabindex",
   title: "Tabindex on non-interactive element",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Only add `tabIndex` to interactive elements or interactive roles.",
   category: "Accessibility",

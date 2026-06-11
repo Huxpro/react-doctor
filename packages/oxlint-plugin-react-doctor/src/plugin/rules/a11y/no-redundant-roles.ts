@@ -33,6 +33,7 @@ export const noRedundantRoles = defineRule<Rule>({
   id: "no-redundant-roles",
   title: "Redundant ARIA role",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Remove `role` attributes that match what the element already does.",
   category: "Accessibility",

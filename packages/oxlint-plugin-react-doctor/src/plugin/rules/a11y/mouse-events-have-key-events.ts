@@ -46,6 +46,7 @@ export const mouseEventsHaveKeyEvents = defineRule<Rule>({
   id: "mouse-events-have-key-events",
   title: "Mouse handler missing focus handler",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Pair mouse events with keyboard ones so keyboard users are not left out.",
   category: "Accessibility",

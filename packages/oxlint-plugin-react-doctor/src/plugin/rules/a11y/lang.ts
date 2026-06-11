@@ -216,6 +216,7 @@ export const lang = defineRule<Rule>({
   id: "lang",
   title: "Invalid lang attribute value",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Use a valid language code, like `en` or `en-US`.",
   category: "Accessibility",

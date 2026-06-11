@@ -15,6 +15,7 @@ export const ariaProps = defineRule<Rule>({
   id: "aria-props",
   title: "Invalid ARIA attribute",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "error",
   recommendation: "Only use `aria-*` attributes that actually exist.",
   category: "Accessibility",

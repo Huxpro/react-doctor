@@ -48,6 +48,7 @@ export const iframeHasTitle = defineRule<Rule>({
   id: "iframe-has-title",
   title: "iframe missing title",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Add a descriptive `title` to every `<iframe>`.",
   category: "Accessibility",

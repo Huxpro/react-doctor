@@ -32,6 +32,7 @@ export const noDistractingElements = defineRule<Rule>({
   id: "no-distracting-elements",
   title: "Distracting marquee or blink element",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "error",
   recommendation: "Replace `<marquee>` and `<blink>` with normal, accessible markup.",
   category: "Accessibility",

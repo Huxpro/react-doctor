@@ -15,6 +15,7 @@ export const tabindexNoPositive = defineRule<Rule>({
   id: "tabindex-no-positive",
   title: "Positive tabindex value",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation:
     "Use `tabIndex={0}` (focusable in source order) or `tabIndex={-1}` (focus only in code).",

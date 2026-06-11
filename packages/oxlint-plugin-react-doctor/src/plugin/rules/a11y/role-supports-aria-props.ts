@@ -159,6 +159,7 @@ export const roleSupportsAriaProps = defineRule<Rule>({
   id: "role-supports-aria-props",
   title: "Unsupported ARIA prop for role",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Only use `aria-*` attributes that the element's role supports.",
   category: "Accessibility",

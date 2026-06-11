@@ -14,6 +14,7 @@ export const anchorHasContent = defineRule<Rule>({
   id: "anchor-has-content",
   title: "Anchor has no content",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Put readable text inside every `<a>`.",
   category: "Accessibility",

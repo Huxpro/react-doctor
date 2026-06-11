@@ -289,6 +289,7 @@ export const controlHasAssociatedLabel = defineRule<Rule>({
   id: "control-has-associated-label",
   title: "Control missing accessible label",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Give every interactive control a label screen readers can read.",
   category: "Accessibility",

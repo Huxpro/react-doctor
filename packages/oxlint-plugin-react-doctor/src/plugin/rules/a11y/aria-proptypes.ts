@@ -298,6 +298,7 @@ export const ariaProptypes = defineRule<Rule>({
   id: "aria-proptypes",
   title: "Invalid ARIA attribute value",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "error",
   recommendation: "Give each `aria-*` attribute the kind of value it expects.",
   category: "Accessibility",

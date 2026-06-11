@@ -17,6 +17,7 @@ export const ariaActivedescendantHasTabindex = defineRule<Rule>({
   id: "aria-activedescendant-has-tabindex",
   title: "aria-activedescendant missing tabindex",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation:
     "Add `tabIndex` so keyboard users can reach elements that use `aria-activedescendant`.",

@@ -66,6 +66,7 @@ export const noStaticElementInteractions = defineRule<Rule>({
   id: "no-static-element-interactions",
   title: "Interaction on static element",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Give clickable static elements a `role`, or use a button or link.",
   category: "Accessibility",

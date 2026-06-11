@@ -85,6 +85,7 @@ export const imgRedundantAlt = defineRule<Rule>({
   id: "img-redundant-alt",
   title: "Redundant words in image alt",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Do not put 'image' or 'photo' in alt text. Describe what is shown.",
   category: "Accessibility",

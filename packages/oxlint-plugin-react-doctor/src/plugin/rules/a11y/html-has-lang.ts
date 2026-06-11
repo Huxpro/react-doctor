@@ -72,6 +72,7 @@ export const htmlHasLang = defineRule<Rule>({
   id: "html-has-lang",
   title: "html element missing lang",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: 'Set `<html lang="…">` so screen readers know the page language.',
   category: "Accessibility",

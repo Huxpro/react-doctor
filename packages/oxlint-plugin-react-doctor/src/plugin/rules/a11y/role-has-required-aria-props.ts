@@ -27,6 +27,7 @@ export const roleHasRequiredAriaProps = defineRule<Rule>({
   id: "role-has-required-aria-props",
   title: "Role missing required ARIA props",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "error",
   recommendation: "Add every required `aria-*` attribute when you set an interactive role.",
   category: "Accessibility",

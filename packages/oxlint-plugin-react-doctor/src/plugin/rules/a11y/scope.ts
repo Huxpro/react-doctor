@@ -14,6 +14,7 @@ export const scope = defineRule<Rule>({
   id: "scope",
   title: "scope attribute on non-th element",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Only use `scope` on `<th>` cells.",
   category: "Accessibility",

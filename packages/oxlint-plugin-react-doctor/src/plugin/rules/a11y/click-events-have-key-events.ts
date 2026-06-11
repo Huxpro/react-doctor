@@ -26,6 +26,7 @@ export const clickEventsHaveKeyEvents = defineRule<Rule>({
   id: "click-events-have-key-events",
   title: "Click handler missing keyboard handler",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Pair `onClick` with a key handler so keyboard users can trigger it.",
   category: "Accessibility",

@@ -197,6 +197,7 @@ export const labelHasAssociatedControl = defineRule<Rule>({
   id: "label-has-associated-control",
   title: "Label missing associated control",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Tie every label to a control with `htmlFor`, or by nesting the input.",
   category: "Accessibility",

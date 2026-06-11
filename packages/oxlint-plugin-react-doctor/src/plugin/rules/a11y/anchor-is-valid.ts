@@ -72,6 +72,7 @@ export const anchorIsValid = defineRule<Rule>({
   id: "anchor-is-valid",
   title: "Anchor used as a button",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Give links a real destination. Use `<button>` for in-page actions.",
   category: "Accessibility",

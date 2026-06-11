@@ -27,6 +27,7 @@ export const noNoninteractiveElementInteractions = defineRule<Rule>({
   id: "no-noninteractive-element-interactions",
   title: "Handler on non-interactive element",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Put interactions on a button or link, or add an interactive role.",
   category: "Accessibility",

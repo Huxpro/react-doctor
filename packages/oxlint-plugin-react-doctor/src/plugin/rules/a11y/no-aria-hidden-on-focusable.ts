@@ -17,6 +17,7 @@ export const noAriaHiddenOnFocusable = defineRule<Rule>({
   id: "no-aria-hidden-on-focusable",
   title: "aria-hidden on focusable element",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Remove `aria-hidden` from focusable elements, or stop them being focusable.",
   category: "Accessibility",

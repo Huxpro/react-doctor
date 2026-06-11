@@ -184,6 +184,7 @@ export const altText = defineRule<Rule>({
   id: "alt-text",
   title: "Image missing alt text",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "error",
   recommendation: "Give every meaningful image an `alt`, `aria-label`, or `aria-labelledby`.",
   category: "Accessibility",

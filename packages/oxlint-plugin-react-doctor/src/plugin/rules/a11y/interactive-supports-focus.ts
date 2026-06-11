@@ -50,6 +50,7 @@ export const interactiveSupportsFocus = defineRule<Rule>({
   id: "interactive-supports-focus",
   title: "Interactive element not focusable",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Add `tabIndex` to elements with interactive roles and handlers.",
   category: "Accessibility",

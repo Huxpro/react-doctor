@@ -16,6 +16,7 @@ export const ariaUnsupportedElements = defineRule<Rule>({
   id: "aria-unsupported-elements",
   title: "ARIA on unsupported element",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "error",
   recommendation: "Do not put `role` or `aria-*` on reserved HTML elements.",
   category: "Accessibility",

@@ -16,6 +16,7 @@ export const preferTagOverRole = defineRule<Rule>({
   id: "prefer-tag-over-role",
   title: "Role used instead of HTML tag",
   tags: ["react-jsx-only"],
+  disabledBy: ["reactlynx"],
   severity: "warn",
   recommendation: "Replace `role` with the matching HTML element when one exists.",
   category: "Accessibility",
