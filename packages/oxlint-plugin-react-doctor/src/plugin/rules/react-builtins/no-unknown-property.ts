@@ -82,6 +82,13 @@ export const noUnknownProperty = defineRule<Rule>({
   id: "no-unknown-property",
   title: "Unknown DOM property",
   severity: "warn",
+  // ReactLynx host elements (`<view>`, `<text>`, `<scroll-view>`, …)
+  // accept Lynx-specific props (`bindtap`, `catchtap`, `item-key`, …)
+  // that are not in React's DOM-prop allowlist — this rule would flag
+  // every one as "unknown". Lynx doesn't go through React's DOM
+  // attribute resolver, so the "React ignores this prop" message
+  // doesn't apply either.
+  disabledBy: ["reactlynx"],
   recommendation: "Use the prop name React expects, like `className`, `htmlFor`, or `tabIndex`.",
   create: (context) => {
     const { ignore = [], requireDataLowercase = false } = resolveSettings(context.settings);

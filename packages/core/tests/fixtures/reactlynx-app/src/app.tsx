@@ -5,7 +5,7 @@ export const App = (): JSX.Element => {
   return (
     <view>
       <text>{`Count: ${count}`}</text>
-      <text bindtap={() => setCount(count + 1)}>Increment</text>
+      <text bindtap={() => setCount((previous) => previous + 1)}>Increment</text>
     </view>
   );
 };

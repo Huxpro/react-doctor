@@ -68,6 +68,12 @@ Every one of these checks a JavaScript / React-semantic concern that is true reg
 
 None at the time of this audit. A future audit can revisit individual a11y rules if Lynx grows an accessibility-attribute story (currently Lynx host elements don't expose ARIA-style metadata, so re-implementing the rules for Lynx is premature).
 
+## (b) addendum — caught during end-to-end verification
+
+Adding `disabledBy: ["reactlynx"]` to the following rule, which was NOT tagged `react-jsx-only` and so escaped the first audit pass. Caught when running the built CLI against `packages/core/tests/fixtures/reactlynx-app/` and seeing it flag `bindtap` (a Lynx host-element event prop) as an unknown DOM property.
+
+- `react-builtins/no-unknown-property` — hardcoded React-DOM prop allowlist; Lynx host elements accept `bindtap` / `catchtap` / `item-key` / … which aren't in any DOM lib. Adding `disabledBy: ["reactlynx"]` silences the rule on Lynx files. The rule's message ("React ignores this prop") also doesn't apply (Lynx doesn't go through React's DOM attribute resolver), so suppression is correct, not merely tolerant.
+
 ## Other surfaces audited (no change)
 
 The PRD called out a few non-`react-jsx-only` rules as sanity-check candidates. Their status:
