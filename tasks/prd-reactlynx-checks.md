@@ -58,6 +58,54 @@ M0 is the foundation every later milestone relies on. Subsequent milestones do *
 - **Pre-existing test failures (NOT caused by this work).** `packages/oxlint-plugin-react-doctor` has 38 failing tests across 5 files: `react-builtins/jsx-no-new-array-as-prop.regressions`, `jsx-no-new-function-as-prop`, `jsx-no-new-object-as-prop`, `no-array-index-key`, `no-multi-comp`. Verified pre-existing per CLAUDE.md #3 via stash-then-rerun on the clean base ref (identical 38 failures). Triage left to the maintainers.
 - **Commit policy.** Diff is clean and revertible. Commit after maintainer review of the M0 PR and the design choices in US-1.1's helper-skip predicates.
 
+### M6 — borrowed from `lynx-community/skills`
+
+A follow-up integration pass after the M1–M5 milestones landed. The
+[lynx-community/skills](https://github.com/lynx-community/skills)
+repository publishes two skills that overlap with react-doctor's
+ReactLynx coverage:
+
+- `reactlynx-best-practices` — a static-analysis + auto-fix
+  workflow with four authored rules (`detect-background-only`,
+  `proper-event-handlers`, `main-thread-scripts-guide`,
+  `hoist-static-jsx`).
+- `lynx-devtool` — a CLI / programmatic connector that speaks
+  Chrome DevTools Protocol against real Lynx devices, with
+  commands for listing clients/sessions, sampling console,
+  sending CDP commands, capturing screenshots, etc.
+
+react-doctor had no CDP / device-side functionality before this
+section — the borrowed work is additive, not a replacement.
+
+- **US-6.1 (`rl-no-background-only-api-in-render`).** Ported the
+  skill's `detect-background-only` rule (CRITICAL impact per the
+  skill's own ranking). The other four `rl-*` rules already in the
+  plugin all target `'main thread'`-tagged functions; this is the
+  inverse — it catches `lynx.getJSModule(...)` / `NativeModules.*`
+  invoked from main-thread render scope without any opt-out
+  directive. Implementation differs from the skill (oxc ESTree
+  visitor + per-file pre-pass + `Program:exit` resolution vs the
+  skill's ast-grep walk) but the semantics match: render-scope is
+  flagged, BG contexts (useEffect / `'background only'` / inline
+  event/ref handlers / named JSX handlers) are not. Companion test
+  also extends `isBackgroundOnlyFunction` coverage in the
+  shared helper. Registry: 333 → 334 rules.
+- **The other three skill rules were considered and deferred.**
+  `proper-event-handlers` and `main-thread-scripts-guide` are doc-
+  shaped guidance (`target` vs `currentTarget`, `dataset` patterns,
+  `useMainThreadRef` usage); the enforceable subset is already
+  covered by `rl-no-onclick-on-builtin` (M1) and the M4 main-thread
+  rules. `hoist-static-jsx` is already automated by React Compiler
+  on projects where it's enabled and would be a noisy warning on
+  projects where it isn't — net negative.
+- **US-6.2 (lynx-devtool runtime smoke).** Planned follow-up: an
+  opt-in Node script that drives the `lynx-devtool` CLI to verify
+  a built Lynx app against a connected device. Use case: catch
+  thread-violation runtime warnings that no static rule can
+  surface. Gated behind explicit invocation (no CI wiring, no
+  runtime dep on `@byted-lynx/devtool-connector`) because the
+  device side is user-environment-specific.
+
 ---
 
 ## Goals
