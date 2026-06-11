@@ -150,6 +150,7 @@ export const buildTestProject = (options: BuildTestProjectOptions): ProjectInfo 
     hasReactCompiler: options.hasReactCompiler ?? false,
     hasTanStackQuery: options.hasTanStackQuery ?? false,
     hasReactNativeWorkspace: framework === "expo" || framework === "react-native",
+    hasReactLynxWorkspace: framework === "reactlynx",
     expoVersion: framework === "expo" ? "~51.0.0" : null,
     shopifyFlashListVersion: options.shopifyFlashListVersion ?? null,
     shopifyFlashListMajorVersion: options.shopifyFlashListMajorVersion ?? null,

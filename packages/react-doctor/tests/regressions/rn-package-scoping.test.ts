@@ -1359,7 +1359,8 @@ describe("inverted monorepo: web-rooted project with an RN workspace still loads
       project: {
         ...buildTestProject({ rootDirectory: projectDir, framework: "nextjs" }),
         hasReactNativeWorkspace: true,
-      },
+        hasReactLynxWorkspace: false,
+        },
     });
 
     const rnHits = findDiagnosticsByRule(diagnostics, "rn-no-raw-text");

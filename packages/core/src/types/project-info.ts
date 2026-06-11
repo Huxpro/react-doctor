@@ -51,6 +51,21 @@ export interface ProjectInfo {
    */
   hasReactNativeWorkspace: boolean;
   /**
+   * `true` when the project (or any of its workspace packages) declares
+   * `@lynx-js/react` as a dependency. Enables the `reactlynx` capability
+   * — and therefore every `rl-*` rule — even on web-rooted monorepos
+   * where the entry-point `package.json` is Next / Vite / Remix but a
+   * sibling workspace (`apps/lynx`) targets ReactLynx. The file-level
+   * package boundary in `oxlint-plugin-react-doctor` still keeps the
+   * rules silent on the web workspaces.
+   *
+   * Mirrors `hasReactNativeWorkspace` — same shape, same purpose, same
+   * inverted-monorepo case. `false` collapses the gate to the legacy
+   * "framework is reactlynx" behavior — no `rl-*` rules load for the
+   * project at all.
+   */
+  hasReactLynxWorkspace: boolean;
+  /**
    * The declared `expo` package version spec (e.g. `"~51.0.0"`), looked up
    * in the project or any of its workspace packages, or `null` when `expo`
    * isn't a dependency. Doubles as react-doctor's "is this an Expo project?"

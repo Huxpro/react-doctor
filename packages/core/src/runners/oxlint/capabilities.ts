@@ -16,6 +16,14 @@ export const buildCapabilities = (project: ProjectInfo): ReadonlySet<string> => 
   const capabilities = new Set<string>();
 
   capabilities.add(project.framework);
+  // Mirror of the RN workspace-aware gate below: a web-rooted monorepo
+  // (`vite`/`nextjs` root) with an `apps/lynx` workspace needs the
+  // `reactlynx` capability so `rl-*` rules load on the Lynx package.
+  // `capabilities.add(project.framework)` only covers the root-is-Lynx
+  // case; this branch handles the inverted shape.
+  if (project.hasReactLynxWorkspace) {
+    capabilities.add("reactlynx");
+  }
   if (
     project.framework === "expo" ||
     project.framework === "react-native" ||

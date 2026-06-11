@@ -36,6 +36,7 @@ const sampleProject: ProjectInfo = {
   hasReactCompiler: false,
   hasTanStackQuery: false,
   hasReactNativeWorkspace: false,
+  hasReactLynxWorkspace: false,
   expoVersion: null,
   shopifyFlashListVersion: null,
   shopifyFlashListMajorVersion: null,

@@ -1555,6 +1555,63 @@ describe("discoverProject — ReactLynx", () => {
     expect(projectInfo.framework).toBe("reactlynx");
   });
 
+  it("sets `hasReactLynxWorkspace` on a web-rooted monorepo with an apps/lynx workspace", () => {
+    const rootDirectory = path.join(tempDirectory, "vite-rooted-with-lynx-workspace");
+    const lynxDirectory = path.join(rootDirectory, "apps", "lynx");
+    fs.mkdirSync(lynxDirectory, { recursive: true });
+    fs.writeFileSync(
+      path.join(rootDirectory, "package.json"),
+      JSON.stringify({
+        name: "monorepo-root",
+        // Root declares a web bundler explicitly so framework resolves to
+        // `vite`, NOT `reactlynx`. The Lynx workspace is what should still
+        // surface `hasReactLynxWorkspace: true`.
+        dependencies: { react: "^18.3.1", "react-dom": "^18.3.1" },
+        devDependencies: { vite: "^5.0.0" },
+        workspaces: ["apps/*"],
+      }),
+    );
+    fs.writeFileSync(
+      path.join(lynxDirectory, "package.json"),
+      JSON.stringify({
+        name: "lynx-app",
+        dependencies: { "@lynx-js/react": "^0.121.0", react: "^18.3.1" },
+      }),
+    );
+
+    const projectInfo = discoverProject(rootDirectory);
+    expect(projectInfo.framework, "root manifest is vite, not reactlynx").toBe("vite");
+    expect(
+      projectInfo.hasReactLynxWorkspace,
+      "apps/lynx must still surface the workspace flag",
+    ).toBe(true);
+  });
+
+  it("leaves `hasReactLynxWorkspace` false when no workspace declares @lynx-js/react", () => {
+    const rootDirectory = path.join(tempDirectory, "vite-rooted-no-lynx-workspace");
+    const webDirectory = path.join(rootDirectory, "apps", "web");
+    fs.mkdirSync(webDirectory, { recursive: true });
+    fs.writeFileSync(
+      path.join(rootDirectory, "package.json"),
+      JSON.stringify({
+        name: "monorepo-root",
+        dependencies: { react: "^19.0.0", "react-dom": "^19.0.0" },
+        devDependencies: { vite: "^5.0.0" },
+        workspaces: ["apps/*"],
+      }),
+    );
+    fs.writeFileSync(
+      path.join(webDirectory, "package.json"),
+      JSON.stringify({
+        name: "web-app",
+        dependencies: { react: "^19.0.0", "react-dom": "^19.0.0" },
+      }),
+    );
+
+    const projectInfo = discoverProject(rootDirectory);
+    expect(projectInfo.hasReactLynxWorkspace).toBe(false);
+  });
+
   it("keeps RN/Expo signals false on a ReactLynx project without RN/Expo deps", () => {
     const projectDirectory = path.join(tempDirectory, "reactlynx-no-rn");
     fs.mkdirSync(projectDirectory, { recursive: true });

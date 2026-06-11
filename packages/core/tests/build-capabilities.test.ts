@@ -15,6 +15,7 @@ const baseProject: ProjectInfo = {
   hasReactCompiler: false,
   hasTanStackQuery: false,
   hasReactNativeWorkspace: false,
+  hasReactLynxWorkspace: false,
   expoVersion: null,
   shopifyFlashListVersion: null,
   shopifyFlashListMajorVersion: null,
@@ -139,6 +140,7 @@ describe("buildCapabilities", () => {
       ...baseProject,
       framework: "expo",
       hasReactNativeWorkspace: true,
+      hasReactLynxWorkspace: false,
       expoVersion: "~51.0.0",
     });
     expect(capabilities.has("expo")).toBe(true);
@@ -150,6 +152,7 @@ describe("buildCapabilities", () => {
       ...baseProject,
       framework: "vite",
       hasReactNativeWorkspace: true,
+      hasReactLynxWorkspace: false,
       expoVersion: "~51.0.0",
     });
     expect(capabilities.has("expo"), "expo capability is keyed off expoVersion").toBe(true);
@@ -200,6 +203,7 @@ describe("buildCapabilities", () => {
       ...baseProject,
       framework: "reactlynx",
       hasReactNativeWorkspace: false,
+      hasReactLynxWorkspace: false,
       expoVersion: null,
     });
     expect(capabilities.has("reactlynx")).toBe(true);
@@ -214,8 +218,23 @@ describe("buildCapabilities", () => {
       ...baseProject,
       framework: "reactlynx",
       hasReactNativeWorkspace: true,
+      hasReactLynxWorkspace: false,
     });
     expect(capabilities.has("reactlynx")).toBe(true);
     expect(capabilities.has("react-native")).toBe(true);
+  });
+
+  it("emits `reactlynx` capability when a workspace contains a Lynx package on a web-rooted monorepo", () => {
+    const capabilities = buildCapabilities({
+      ...baseProject,
+      framework: "vite",
+      hasReactNativeWorkspace: false,
+      hasReactLynxWorkspace: true,
+    });
+    expect(
+      capabilities.has("reactlynx"),
+      "web-rooted monorepo with apps/lynx workspace still needs reactlynx rules",
+    ).toBe(true);
+    expect(capabilities.has("vite")).toBe(true);
   });
 });

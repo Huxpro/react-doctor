@@ -11,6 +11,7 @@ import { findMonorepoRoot, isMonorepoRoot } from "./find-monorepo-root.js";
 import { findReactInWorkspaces } from "./find-react-in-workspaces.js";
 import { getDependencyDeclaration } from "./utils/get-dependency-declaration.js";
 import { hasReactNativeWorkspaceAnywhere } from "./has-react-native-workspace-anywhere.js";
+import { hasReactLynxWorkspaceAnywhere } from "./has-reactlynx-workspace-anywhere.js";
 import { findExpoVersion } from "./find-expo-version.js";
 import {
   findShopifyFlashListVersion,
@@ -193,6 +194,15 @@ export const discoverProject = (directory: string): ProjectInfo => {
     framework === "react-native" ||
     hasReactNativeWorkspaceAnywhere(directory, packageJson);
 
+  // Mirror of `hasReactNativeWorkspace` for the ReactLynx side: covers
+  // the inverted case where a web-rooted monorepo (`framework: "vite"`
+  // / `"nextjs"`) contains an `apps/lynx` workspace. Without this flag,
+  // `capabilities.add(project.framework)` would only emit `reactlynx`
+  // when the root manifest itself is the Lynx project — Lynx-as-a-
+  // workspace would silently lose every `rl-*` rule.
+  const hasReactLynxWorkspace =
+    framework === "reactlynx" || hasReactLynxWorkspaceAnywhere(directory, packageJson);
+
   const expoVersion = hasReactNativeWorkspace
     ? resolveCatalogBackedDependencyVersion({
         rootDirectory: directory,
@@ -235,6 +245,7 @@ export const discoverProject = (directory: string): ProjectInfo => {
     preactVersion,
     preactMajorVersion: parseReactMajor(preactVersion),
     hasReactNativeWorkspace,
+    hasReactLynxWorkspace,
     expoVersion,
     shopifyFlashListVersion,
     shopifyFlashListMajorVersion:
