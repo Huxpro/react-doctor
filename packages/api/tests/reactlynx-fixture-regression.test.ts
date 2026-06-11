@@ -74,4 +74,18 @@ describe("diagnose — reactlynx-app fixture", () => {
     );
     expect(projectLevelDiagnostics).toEqual([]);
   });
+
+  it("does NOT flag background-only APIs on a clean fixture without `lynx.getJSModule`/`NativeModules`", async () => {
+    // Wiring contract for `rl-no-background-only-api-in-render`: the
+    // rule (ported from the `reactlynx-best-practices` skill's
+    // `detect-background-only`) must reach the fixture through the
+    // plugin pipeline AND must not false-positive on a Lynx project
+    // that never reaches for those APIs. Positive/negative AST
+    // semantics are unit-tested separately.
+    const result = await diagnose(REACTLYNX_FIXTURE, { lint: true, deadCode: false });
+    const backgroundOnlyDiagnostics = result.diagnostics.filter(
+      (diagnostic) => diagnostic.rule === "rl-no-background-only-api-in-render",
+    );
+    expect(backgroundOnlyDiagnostics).toEqual([]);
+  });
 });

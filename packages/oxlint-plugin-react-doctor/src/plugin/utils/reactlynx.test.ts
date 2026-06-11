@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test";
 import { parseFixture } from "../../test-utils/parse-fixture.js";
-import { isMainThreadFunction } from "./reactlynx.js";
+import { isBackgroundOnlyFunction, isMainThreadFunction } from "./reactlynx.js";
 import type { EsTreeNode } from "./es-tree-node.js";
 
 const parseAndFindFirstFunction = (
@@ -169,5 +169,63 @@ describe("isMainThreadFunction — non-function nodes", () => {
     const expr = parseAndFindFirstFunction(`'main thread';`, (node) => node.type === "ExpressionStatement");
     expect(expr).not.toBeNull();
     expect(isMainThreadFunction(expr!)).toBe(false);
+  });
+});
+
+describe("isBackgroundOnlyFunction — positive cases", () => {
+  it("detects an arrow function with `'background only'` directive", () => {
+    const fn = parseAndFindFirstFunction(
+      `const fetchUser = () => { 'background only'; return lynx.getJSModule('UserAPI').getUser(); };`,
+    );
+    expect(fn).not.toBeNull();
+    expect(isBackgroundOnlyFunction(fn!)).toBe(true);
+  });
+
+  it("detects a function declaration with `'background only'` directive", () => {
+    const fn = parseAndFindFirstFunction(
+      `function doWork() { 'background only'; NativeModules.Foo.bar(); }`,
+    );
+    expect(fn).not.toBeNull();
+    expect(isBackgroundOnlyFunction(fn!)).toBe(true);
+  });
+
+  it("accepts double-quoted directives", () => {
+    const fn = parseAndFindFirstFunction(
+      `function doWork() { "background only"; NativeModules.Foo.bar(); }`,
+    );
+    expect(fn).not.toBeNull();
+    expect(isBackgroundOnlyFunction(fn!)).toBe(true);
+  });
+});
+
+describe("isBackgroundOnlyFunction — negative cases", () => {
+  it("returns false for a function without any directive", () => {
+    const fn = parseAndFindFirstFunction(`function doWork() { NativeModules.Foo.bar(); }`);
+    expect(fn).not.toBeNull();
+    expect(isBackgroundOnlyFunction(fn!)).toBe(false);
+  });
+
+  it("returns false when `'main thread'` is the directive", () => {
+    const fn = parseAndFindFirstFunction(`function onTap() { 'main thread'; doSomething(); }`);
+    expect(fn).not.toBeNull();
+    expect(isBackgroundOnlyFunction(fn!)).toBe(false);
+  });
+
+  it("ignores a non-prologue `'background only'` string expression", () => {
+    // The directive must be the FIRST statement. A regular string
+    // expression mid-body is just a string, not a directive.
+    const fn = parseAndFindFirstFunction(
+      `function doWork() { console.log('hi'); 'background only'; NativeModules.Foo.bar(); }`,
+    );
+    expect(fn).not.toBeNull();
+    expect(isBackgroundOnlyFunction(fn!)).toBe(false);
+  });
+
+  it("ignores `console.log('background only')` as a body expression", () => {
+    const fn = parseAndFindFirstFunction(
+      `function doWork() { console.log('background only'); NativeModules.Foo.bar(); }`,
+    );
+    expect(fn).not.toBeNull();
+    expect(isBackgroundOnlyFunction(fn!)).toBe(false);
   });
 });

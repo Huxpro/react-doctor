@@ -268,6 +268,7 @@ import { rerenderStateOnlyInHandlers } from "./rules/state-and-effects/rerender-
 import { rerenderTransitionsScroll } from "./rules/performance/rerender-transitions-scroll.js";
 import { rlMainThreadDirective } from "./rules/reactlynx/rl-main-thread-directive.js";
 import { rlNoAsyncInMainThread } from "./rules/reactlynx/rl-no-async-in-main-thread.js";
+import { rlNoBackgroundOnlyApiInRender } from "./rules/reactlynx/rl-no-background-only-api-in-render.js";
 import { rlNoDomGlobals } from "./rules/reactlynx/rl-no-dom-globals.js";
 import { rlNoOnclickOnBuiltin } from "./rules/reactlynx/rl-no-onclick-on-builtin.js";
 import { rlPreferMainThreadRef } from "./rules/reactlynx/rl-prefer-main-thread-ref.js";
@@ -3204,6 +3205,18 @@ export const reactDoctorRules = [
       framework: "reactlynx",
       category: "Bugs",
       tags: [...new Set(["reactlynx", ...(rlNoAsyncInMainThread.tags ?? [])])],
+    },
+  },
+  {
+    key: "react-doctor/rl-no-background-only-api-in-render",
+    id: "rl-no-background-only-api-in-render",
+    source: "react-doctor",
+    originallyExternal: false,
+    rule: {
+      ...rlNoBackgroundOnlyApiInRender,
+      framework: "reactlynx",
+      category: "Bugs",
+      tags: [...new Set(["reactlynx", ...(rlNoBackgroundOnlyApiInRender.tags ?? [])])],
     },
   },
   {
