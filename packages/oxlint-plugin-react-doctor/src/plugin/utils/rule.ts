@@ -11,6 +11,7 @@ export type RuleFramework =
   | "global"
   | "nextjs"
   | "react-native"
+  | "reactlynx"
   | "tanstack-start"
   | "tanstack-query"
   | "preact";

@@ -130,6 +130,21 @@ const isExpoManaged = (packageJson: PackageJsonDependencyView): boolean => {
   return false;
 };
 
+// Lynx-specific: only the runtime package counts. A workspace that
+// declares ONLY the build tools (`@lynx-js/rspeedy` /
+// `@lynx-js/react-rsbuild-plugin`) without `@lynx-js/react` is a
+// build-tooling package, not a Lynx app — flagging `rl-*` rules there
+// would false-positive.
+const REACTLYNX_RUNTIME_PACKAGE = "@lynx-js/react";
+const isReactLynxAware = (packageJson: PackageJsonDependencyView): boolean => {
+  for (const sectionName of DEPENDENCY_SECTION_NAMES) {
+    const section = packageJson[sectionName];
+    if (!section) continue;
+    if (REACTLYNX_RUNTIME_PACKAGE in section) return true;
+  }
+  return false;
+};
+
 const isWebFrameworkOnly = (packageJson: PackageJsonDependencyView): boolean => {
   for (const dependencyName of iterateDependencyNames(packageJson)) {
     if (WEB_FRAMEWORK_DEPENDENCY_NAMES.has(dependencyName)) return true;
@@ -137,12 +152,21 @@ const isWebFrameworkOnly = (packageJson: PackageJsonDependencyView): boolean => 
   return false;
 };
 
-export type PackagePlatform = "expo" | "react-native" | "web" | "unknown";
+export type PackagePlatform = "expo" | "reactlynx" | "react-native" | "web" | "unknown";
 
 // Classifies the package owning `filename`:
 //
 //   "expo"         — the nearest `package.json` declares an Expo-managed
 //                    app dependency such as `expo` or `expo-router`.
+//
+//   "reactlynx"    — the nearest `package.json` declares `@lynx-js/react`
+//                    (the ReactLynx runtime). Sits ABOVE `react-native`
+//                    in precedence because Lynx libraries reuse Metro's
+//                    `react-native` top-level field, so a Lynx-only
+//                    package would otherwise be mis-classified as RN.
+//                    Sits BELOW `expo` because a package declaring both
+//                    `expo` and `@lynx-js/react` is almost certainly a
+//                    mis-install — Expo-side checks should still fire.
 //
 //   "react-native" — the nearest `package.json` declares a React Native
 //                    dependency. Mixed RN+web monorepo packages (which
@@ -179,6 +203,8 @@ export const classifyPackagePlatform = (filename: string): PackagePlatform => {
   let result: PackagePlatform;
   if (isExpoManaged(packageJson)) {
     result = "expo";
+  } else if (isReactLynxAware(packageJson)) {
+    result = "reactlynx";
   } else if (isReactNativeAware(packageJson)) {
     result = "react-native";
   } else if (isWebFrameworkOnly(packageJson)) {

@@ -25,6 +25,7 @@ const BUCKET_TO_FRAMEWORK = {
   nextjs: "nextjs",
   preact: "preact",
   "react-native": "react-native",
+  reactlynx: "reactlynx",
   "tanstack-query": "tanstack-query",
   "tanstack-start": "tanstack-start",
 };
@@ -38,6 +39,7 @@ const BUCKET_TO_FRAMEWORK = {
 // inherit a bucket tag and carry its own.
 const BUCKET_TO_AUTO_TAGS = {
   "react-native": ["react-native"],
+  reactlynx: ["reactlynx"],
   server: ["server-action"],
 };
 
@@ -102,6 +104,7 @@ const CATEGORY_BUCKET = {
   "React Compiler": "Performance",
   "Next.js": "Bugs",
   "React Native": "Bugs",
+  ReactLynx: "Bugs",
   Server: "Bugs",
   "TanStack Query": "Bugs",
   "TanStack Start": "Bugs",
@@ -129,6 +132,7 @@ const BUCKET_TO_DEFAULT_CATEGORY = {
   preact: "Preact",
   "react-builtins": "Correctness",
   "react-native": "React Native",
+  reactlynx: "ReactLynx",
   "react-ui": "Accessibility",
   security: "Security",
   server: "Server",

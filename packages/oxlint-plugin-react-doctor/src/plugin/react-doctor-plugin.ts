@@ -3,6 +3,7 @@ import type { Rule } from "./utils/rule.js";
 import type { HostRule } from "./utils/rule-plugin.js";
 import type { RulePlugin } from "./utils/rule-plugin.js";
 import { wrapReactNativeRule } from "./utils/wrap-react-native-rule.js";
+import { wrapReactlynxRule } from "./utils/wrap-reactlynx-rule.js";
 import { wrapWithSemanticContext } from "./utils/wrap-with-semantic-context.js";
 
 // Wraps every `framework: "react-native"` rule with the shared package-
@@ -19,7 +20,12 @@ import { wrapWithSemanticContext } from "./utils/wrap-with-semantic-context.js";
 const applyFrameworkRuleWrappers = (registry: Record<string, Rule>): Record<string, HostRule> => {
   const wrapped: Record<string, HostRule> = {};
   for (const [ruleId, rule] of Object.entries(registry)) {
-    const frameworkWrapped = rule.framework === "react-native" ? wrapReactNativeRule(rule) : rule;
+    const frameworkWrapped =
+      rule.framework === "react-native"
+        ? wrapReactNativeRule(rule)
+        : rule.framework === "reactlynx"
+          ? wrapReactlynxRule(rule)
+          : rule;
     wrapped[ruleId] = wrapWithSemanticContext(frameworkWrapped);
   }
   return wrapped;

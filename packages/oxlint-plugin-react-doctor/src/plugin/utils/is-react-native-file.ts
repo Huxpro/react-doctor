@@ -51,6 +51,12 @@ export const isReactNativeFileActive = (context: RuleContext): boolean => {
 
   const packagePlatform = classifyPackagePlatform(filename);
   if (packagePlatform === "web") return false;
+  // A package classified as ReactLynx is NOT an RN target — `@lynx-js/react`
+  // is a separate runtime. Without this, mixed monorepos where the root
+  // is RN-aware (project-level `hasReactNativeWorkspace`) would keep
+  // firing `rn-*` rules in `apps/lynx`. Returning false here is what
+  // the file-level boundary buys.
+  if (packagePlatform === "reactlynx") return false;
   if (packagePlatform === "expo" || packagePlatform === "react-native") return true;
 
   const framework = getReactDoctorStringSetting(context.settings, "framework");
