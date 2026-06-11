@@ -266,6 +266,11 @@ import { rerenderMemoBeforeEarlyReturn } from "./rules/performance/rerender-memo
 import { rerenderMemoWithDefaultValue } from "./rules/performance/rerender-memo-with-default-value.js";
 import { rerenderStateOnlyInHandlers } from "./rules/state-and-effects/rerender-state-only-in-handlers.js";
 import { rerenderTransitionsScroll } from "./rules/performance/rerender-transitions-scroll.js";
+import { rlMainThreadDirective } from "./rules/reactlynx/rl-main-thread-directive.js";
+import { rlNoAsyncInMainThread } from "./rules/reactlynx/rl-no-async-in-main-thread.js";
+import { rlNoDomGlobals } from "./rules/reactlynx/rl-no-dom-globals.js";
+import { rlNoOnclickOnBuiltin } from "./rules/reactlynx/rl-no-onclick-on-builtin.js";
+import { rlPreferMainThreadRef } from "./rules/reactlynx/rl-prefer-main-thread-ref.js";
 import { rnAnimateLayoutProperty } from "./rules/react-native/rn-animate-layout-property.js";
 import { rnAnimationReactionAsDerived } from "./rules/react-native/rn-animation-reaction-as-derived.js";
 import { rnBottomSheetPreferNative } from "./rules/react-native/rn-bottom-sheet-prefer-native.js";
@@ -3175,6 +3180,66 @@ export const reactDoctorRules = [
       ...rerenderTransitionsScroll,
       framework: "global",
       category: "Performance",
+    },
+  },
+  {
+    key: "react-doctor/rl-main-thread-directive",
+    id: "rl-main-thread-directive",
+    source: "react-doctor",
+    originallyExternal: false,
+    rule: {
+      ...rlMainThreadDirective,
+      framework: "reactlynx",
+      category: "Bugs",
+      tags: [...new Set(["reactlynx", ...(rlMainThreadDirective.tags ?? [])])],
+    },
+  },
+  {
+    key: "react-doctor/rl-no-async-in-main-thread",
+    id: "rl-no-async-in-main-thread",
+    source: "react-doctor",
+    originallyExternal: false,
+    rule: {
+      ...rlNoAsyncInMainThread,
+      framework: "reactlynx",
+      category: "Bugs",
+      tags: [...new Set(["reactlynx", ...(rlNoAsyncInMainThread.tags ?? [])])],
+    },
+  },
+  {
+    key: "react-doctor/rl-no-dom-globals",
+    id: "rl-no-dom-globals",
+    source: "react-doctor",
+    originallyExternal: false,
+    rule: {
+      ...rlNoDomGlobals,
+      framework: "reactlynx",
+      category: "Bugs",
+      tags: [...new Set(["reactlynx", ...(rlNoDomGlobals.tags ?? [])])],
+    },
+  },
+  {
+    key: "react-doctor/rl-no-onclick-on-builtin",
+    id: "rl-no-onclick-on-builtin",
+    source: "react-doctor",
+    originallyExternal: false,
+    rule: {
+      ...rlNoOnclickOnBuiltin,
+      framework: "reactlynx",
+      category: "Bugs",
+      tags: [...new Set(["reactlynx", ...(rlNoOnclickOnBuiltin.tags ?? [])])],
+    },
+  },
+  {
+    key: "react-doctor/rl-prefer-main-thread-ref",
+    id: "rl-prefer-main-thread-ref",
+    source: "react-doctor",
+    originallyExternal: false,
+    rule: {
+      ...rlPreferMainThreadRef,
+      framework: "reactlynx",
+      category: "Bugs",
+      tags: [...new Set(["reactlynx", ...(rlPreferMainThreadRef.tags ?? [])])],
     },
   },
   {
