@@ -414,3 +414,136 @@ thread-violation patterns. It's NOT in CI — invoke manually after
 building and loading your Lynx app on a connected device. Catches
 the dynamic-dispatch / typed-proxy / runtime-only cases that
 static rules can't prove.
+
+---
+
+## Appendix: static rules vs. skills
+
+Working through the four skill rules above forced an explicit
+boundary between what oxlint-style static analysis can prove
+and what an agent-style skill is better at. Worth writing down,
+both for the next contributor weighing a new rule and for the
+M7+ planning around how this branch evolves.
+
+### Where each one wins
+
+| Layer | Strength | Weakness |
+|-------|----------|----------|
+| **Static rules** (`rl-*` in oxlint plugin) | Decidable, deterministic, zero-config, run in CI, no FP budget. One rule scales to every consumer. Caches well in editor LSP. | Bounded by the AST. Can't see runtime state, dynamic dispatch, type aliases, or "did the user actually mean this." |
+| **Skills** (`reactlynx-best-practices` etc.) | Carry guidance that doesn't lower to AST (`target` vs `currentTarget`, when to use `'main thread'`). Can ask the user before applying fixes. Compose orchestration (review → refactor) and bring LLM-shaped judgement. | Per-invocation, not per-PR. Run in agent context, not CI. State of the world matters (skill installed where? at which version?). |
+| **Runtime smoke** (`lynx-devtool`-backed verification) | Catches things the source can't prove: dynamic dispatch, hot-reload-stale bindings, environment drift. The ground truth for "does this run." | Requires a connected device. No CI signal. Sampling-based — coverage depends on what the device exercised. |
+
+The three are complements, not substitutes. The dual-implementation
+tax of `rl-no-background-only-api-in-render` (oxlint plugin) /
+`detect-background-only` (skill) is the most concrete example: the
+same rule lives in two places because each runtime targets a
+different invocation context (CI vs agent), but the semantic
+intent is identical. That's a smell worth designing away.
+
+### Today's gaps
+
+1. **Dual sources of truth.** The skill's `detect-background-only`
+   and our `rl-no-background-only-api-in-render` are independently
+   maintained. A change to the recognized BG-context list (say,
+   adding a new effect-hook name) has to land in both. Skill ports
+   are not a one-time event; they drift.
+
+2. **`recommendation` is free-text.** Each `rl-*` rule's
+   recommendation tells you _what_ to do but doesn't link to an
+   executable fixer. A reader has to know the skill exists, find it,
+   invoke it. The link from `rl-no-background-only-api-in-render`'s
+   diagnostic to `reactlynx-best-practices`'s `refactor` mode (which
+   could apply the fix automatically) is implicit — only mentioned
+   in this doc, not surfaced in the CLI output.
+
+3. **Asymmetric severity treatment.** A static rule fires at a
+   fixed severity (`error` for everything in the rl-* family today).
+   A skill running in `review` mode might downgrade severity based
+   on runtime context the lint can't see (e.g. "this `useRef` in a
+   main-thread function never actually reads `.current` so the
+   prefer-main-thread-ref warning is moot"). We have no contract
+   for that downgrade signal to flow back.
+
+4. **Skill rules-as-docs orphaned from any verifier.** The skill
+   ships four rules but only implements a detector for one. The
+   other three are markdown guidance. Nothing prevents drift between
+   the prose and reality — if the `main-thread:` attribute syntax
+   changes, the doc stays stale until a human notices.
+
+5. **No shared schema for "rule" across surfaces.** A rule today
+   exists as: a TypeScript object in the oxlint plugin, a markdown
+   file under the skill's `rules/`, optionally an ast-grep query in
+   the skill's scripts. They share a name but no structure.
+
+### Evolution directions
+
+These are sketches, not commitments — the goal is to surface where
+this could go so future planning has a target.
+
+1. **Structured `recommendation` → skill invocation.** Extend
+   the `Rule` interface so `recommendation` can carry a structured
+   pointer:
+   ```ts
+   recommendation: {
+     prose: "Move the call into useEffect / 'background only' / …",
+     skill: { name: "reactlynx-best-practices", mode: "refactor" },
+   }
+   ```
+   The CLI / GitHub Action surface can then suggest "ask the
+   `reactlynx-best-practices` skill to fix this" with a one-shot
+   command. Each diagnostic becomes its own auto-fix entry point.
+
+2. **One source of truth for ported rules.** Pull the rule's
+   detection contract (recognized patterns, BG-context list,
+   message templates) into a shared JSON spec the oxlint rule and
+   the skill's ast-grep walk both consume. Updating the list of
+   recognized effect hooks in one place propagates to both. The
+   work to define the JSON shape is the cost; the saving is no
+   drift after that.
+
+3. **Skill mode flows back into severity.** A skill that runs
+   `lynx-devtool` during review could attach metadata to the scan
+   result: "this rl-prefer-main-thread-ref instance never reads
+   `.current` on the runtime path." The next CI run could honor
+   that as a per-instance suppression — explicit, traceable, with
+   a known origin.
+
+4. **Static rule as triage filter; skill as fix author.** For
+   higher-FP rules (the non-enforced subsets in the tables above),
+   we could ship a low-severity heuristic rule that defers the
+   decision to the skill: "this looks like a `target`/`currentTarget`
+   confusion — `reactlynx-best-practices` in review mode will
+   confirm or dismiss." The static rule's job becomes "narrow the
+   search space," not "make the call."
+
+5. **Skill rules + sample code as auto-test fixtures.** The skill's
+   `rules/*.md` already contain "incorrect" / "correct" code blocks.
+   A small extractor could compile those into oxlint fixtures
+   automatically — so the day a skill rule lands a new bad case,
+   the corresponding `rl-*` rule must turn green on it before the
+   PR merges. Aligns reality with prose by construction.
+
+6. **Runtime verification as a CI signal.** `scripts/verify-reactlynx-runtime.mjs`
+   is opt-in today because no CI has a Lynx device. As Lynx test
+   infra matures (simulator-based CI, e.g. via the
+   `serve-sim` / `lynx-devtool` chain), the script becomes a real
+   build-gate — and the "dynamic dispatch" / "typed proxy" gaps
+   in our static rules stop being silent.
+
+7. **Bidirectional invocation.** Editor integration where a static
+   rule's diagnostic carries a "Run skill" code-action could close
+   the loop: the rule identifies the location, the skill explains
+   _why_ (with the rule doc) and offers to apply the fix, the
+   editor records the user's choice. Today there are three
+   manual hops; tomorrow it's a click.
+
+### The underlying tendency
+
+Static analysis and agent-style skills are converging on
+**layered, complementary checks**: static for the decidable
+broad strokes, skills for context and judgement, runtime smoke for
+the things only execution can prove. The pieces already exist on
+this branch in skeletal form; the next architecture move is the
+contract between them — schema, severity flow, fixture sharing —
+so adding a new ReactLynx footgun is a single coordinated update
+across the three layers, not a triple-write across disjoint repos.
