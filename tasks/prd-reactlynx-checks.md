@@ -98,13 +98,22 @@ section — the borrowed work is additive, not a replacement.
   rules. `hoist-static-jsx` is already automated by React Compiler
   on projects where it's enabled and would be a noisy warning on
   projects where it isn't — net negative.
-- **US-6.2 (lynx-devtool runtime smoke).** Planned follow-up: an
-  opt-in Node script that drives the `lynx-devtool` CLI to verify
-  a built Lynx app against a connected device. Use case: catch
-  thread-violation runtime warnings that no static rule can
-  surface. Gated behind explicit invocation (no CI wiring, no
-  runtime dep on `@byted-lynx/devtool-connector`) because the
-  device side is user-environment-specific.
+- **US-6.2 (lynx-devtool runtime smoke).** Shipped: a
+  `scripts/verify-reactlynx-runtime.mjs` Node script that shells
+  out to the `lynx-devtool` CLI. Runs `list-clients` (skips with
+  exit 0 when no device connected) then `get-console` on both
+  `main` and `background` threads, filtered to error/warning, and
+  grep for thread-violation patterns (`is not defined`,
+  `lynx.getJSModule is not a function`, `NativeModules`,
+  `main thread`, `background only`, `Cross-thread`). Exits 1
+  on any sampled hit, 0 on clean. The script accepts `--cli
+  <path>` or `LYNX_DEVTOOL_CLI` env var to locate the CLI;
+  defaults to the `lynx-community/skills` install path
+  (`~/.claude/skills/lynx-devtool/scripts/index.mjs`). NOT in CI
+  — invoke manually after building / opening your Lynx app on a
+  connected device. Use case: catches the dual-thread footguns
+  that no AST-level rule can prove (e.g. a `'background only'`
+  function reached from main-thread render via dynamic dispatch).
 
 ---
 
