@@ -36,6 +36,7 @@ export * from "./check-dead-code.js";
 export * from "./check-expo-project.js";
 export * from "./check-pnpm-hardening.js";
 export * from "./check-react-native-project.js";
+export * from "./check-reactlynx-project.js";
 export * from "./check-reduced-motion.js";
 export * from "./collect-ignore-patterns.js";
 export * from "./constants.js";
