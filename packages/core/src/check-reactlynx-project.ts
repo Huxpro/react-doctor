@@ -1,5 +1,6 @@
 import type { Diagnostic, ProjectInfo } from "./types/index.js";
 import { checkReactlynxEngineVersions } from "./checks/reactlynx/check-engine-versions.js";
+import { checkRl2Rl3MigrationDebt } from "./checks/reactlynx/check-rl2-rl3-migration-debt.js";
 
 // Project-level checks that apply only to ReactLynx projects — manifest /
 // install footguns specific to the @lynx-js engine trio. Gated on
@@ -18,5 +19,6 @@ export const checkReactlynxProject = (
   if (!isReactLynxProject(project)) return [];
   return [
     ...checkReactlynxEngineVersions(rootDirectory),
+    ...checkRl2Rl3MigrationDebt(rootDirectory),
   ];
 };

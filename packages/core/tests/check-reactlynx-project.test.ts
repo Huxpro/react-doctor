@@ -154,3 +154,113 @@ describe("checkReactlynxProject — engine versions: all absent", () => {
     expect(checkReactlynxProject(projectDirectory, buildLynxProject(projectDirectory))).toEqual([]);
   });
 });
+
+const writeFile = (projectDirectory: string, relativePath: string, contents: string): void => {
+  const fullPath = path.join(projectDirectory, relativePath);
+  fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+  fs.writeFileSync(fullPath, contents);
+};
+
+// Helper: a complete-trio install so the engine-versions check doesn't
+// add to the noise during migration-debt tests.
+const writeCompleteEngineTrio = (projectDirectory: string): void => {
+  writePackageJson(projectDirectory, {
+    name: "lynx-app",
+    dependencies: {
+      "@lynx-js/react": "^0.121.0",
+    },
+    devDependencies: {
+      "@lynx-js/rspeedy": "^0.14.0",
+      "@lynx-js/react-rsbuild-plugin": "^0.16.0",
+    },
+  });
+};
+
+describe("checkReactlynxProject — RL2 migration debt", () => {
+  it("flags a `lepus.js` at project root", () => {
+    const projectDirectory = makeProjectDirectory();
+    writeCompleteEngineTrio(projectDirectory);
+    writeFile(projectDirectory, "lepus.js", "// rl2 entry\n");
+    const diagnostics = checkReactlynxProject(projectDirectory, buildLynxProject(projectDirectory));
+    const migrationDiag = diagnostics.find((d) => d.rule === "rl-no-reactlynx-2-residue");
+    expect(migrationDiag).toBeDefined();
+    expect(migrationDiag?.severity).toBe("error");
+    expect(migrationDiag?.message).toContain("lepus.js");
+    expect(migrationDiag?.message).toContain("migrax-planner-rl3");
+  });
+
+  it("flags a `src/lepus.js`", () => {
+    const projectDirectory = makeProjectDirectory();
+    writeCompleteEngineTrio(projectDirectory);
+    writeFile(projectDirectory, "src/lepus.js", "// rl2 entry\n");
+    const diagnostics = checkReactlynxProject(projectDirectory, buildLynxProject(projectDirectory));
+    expect(diagnostics.some((d) => d.message.includes("src/lepus.js"))).toBe(true);
+  });
+
+  it("flags a `card.json` at project root", () => {
+    const projectDirectory = makeProjectDirectory();
+    writeCompleteEngineTrio(projectDirectory);
+    writeFile(projectDirectory, "card.json", "{}\n");
+    const diagnostics = checkReactlynxProject(projectDirectory, buildLynxProject(projectDirectory));
+    expect(diagnostics.some((d) => d.message.includes("card.json"))).toBe(true);
+  });
+
+  it("flags a `lynx-speedy` dependency in package.json", () => {
+    const projectDirectory = makeProjectDirectory();
+    writePackageJson(projectDirectory, {
+      name: "lynx-app",
+      dependencies: {
+        "@lynx-js/react": "^0.121.0",
+        "lynx-speedy": "^2.0.0",
+      },
+      devDependencies: {
+        "@lynx-js/rspeedy": "^0.14.0",
+        "@lynx-js/react-rsbuild-plugin": "^0.16.0",
+      },
+    });
+    const diagnostics = checkReactlynxProject(projectDirectory, buildLynxProject(projectDirectory));
+    const migrationDiag = diagnostics.find((d) => d.message.includes("lynx-speedy"));
+    expect(migrationDiag).toBeDefined();
+    expect(migrationDiag?.severity).toBe("error");
+  });
+
+  it("flags a `lynx-speedy` devDependency", () => {
+    const projectDirectory = makeProjectDirectory();
+    writePackageJson(projectDirectory, {
+      name: "lynx-app",
+      dependencies: { "@lynx-js/react": "^0.121.0" },
+      devDependencies: {
+        "@lynx-js/rspeedy": "^0.14.0",
+        "@lynx-js/react-rsbuild-plugin": "^0.16.0",
+        "lynx-speedy": "^2.0.0",
+      },
+    });
+    const diagnostics = checkReactlynxProject(projectDirectory, buildLynxProject(projectDirectory));
+    expect(diagnostics.some((d) => d.message.includes("lynx-speedy"))).toBe(true);
+  });
+
+  it("emits one diagnostic per signal when multiple are present", () => {
+    const projectDirectory = makeProjectDirectory();
+    writePackageJson(projectDirectory, {
+      name: "lynx-app",
+      dependencies: { "@lynx-js/react": "^0.121.0" },
+      devDependencies: {
+        "@lynx-js/rspeedy": "^0.14.0",
+        "@lynx-js/react-rsbuild-plugin": "^0.16.0",
+        "lynx-speedy": "^2.0.0",
+      },
+    });
+    writeFile(projectDirectory, "lepus.js", "// rl2 entry\n");
+    writeFile(projectDirectory, "card.json", "{}\n");
+    const diagnostics = checkReactlynxProject(projectDirectory, buildLynxProject(projectDirectory));
+    const migrationDiags = diagnostics.filter((d) => d.rule === "rl-no-reactlynx-2-residue");
+    expect(migrationDiags).toHaveLength(3);
+  });
+
+  it("does NOT flag a clean RL3 project", () => {
+    const projectDirectory = makeProjectDirectory();
+    writeCompleteEngineTrio(projectDirectory);
+    const diagnostics = checkReactlynxProject(projectDirectory, buildLynxProject(projectDirectory));
+    expect(diagnostics.filter((d) => d.rule === "rl-no-reactlynx-2-residue")).toEqual([]);
+  });
+});
