@@ -1,0 +1,78 @@
+name: Deploy ReactLynx fork site to GitHub Pages
+
+# Builds packages/website as a static export and publishes it to
+# `https://<owner>.github.io/<repo>/`. Triggers on push to the
+# reactlynx-support branch, or manually via `workflow_dispatch`.
+#
+# Requirements on the repo:
+#   - Settings → Pages → Source must be set to "GitHub Actions".
+#   - basePath in packages/website/next.config.ts must match the repo name
+#     (defaults to `/react-doctor`).
+
+on:
+  push:
+    branches: [reactlynx-support]
+    paths:
+      - "packages/website/**"
+      - "docs/hackathon-presentation/**"
+      - ".github/workflows/pages.yml"
+      - "pnpm-lock.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22.18.0"
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build website (static export)
+        run: pnpm -F website build
+
+      - name: Bundle hackathon deck into the static site
+        # Copies the hackathon presentation into out/deck/ so it's reachable
+        # at <pages-url>/deck/ alongside the homepage.
+        run: |
+          mkdir -p packages/website/out/deck
+          cp -R docs/hackathon-presentation/* packages/website/out/deck/
+
+      - name: Disable Jekyll on the artifact
+        # GitHub Pages defaults to Jekyll, which silently drops files/folders
+        # whose names start with an underscore (we have several under
+        # _next/). The `.nojekyll` marker switches Pages to plain static.
+        run: touch packages/website/out/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: packages/website/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

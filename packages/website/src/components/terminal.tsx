@@ -3,6 +3,11 @@
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { Copy, Check, ChevronRight, RotateCcw } from "lucide-react";
+
+// next/image with `images.unoptimized: true` does not auto-prepend
+// the configured `basePath` to absolute src URLs, so the favicon would
+// 404 under GitHub Pages. Build the asset URL by hand.
+const FAVICON_URL = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/favicon.svg`;
 import { PERFECT_SCORE, RUN_COMMAND } from "@/constants";
 import { getDoctorFace } from "@/utils/get-doctor-face";
 import { getScoreColorClass } from "@/utils/get-score-color-class";
@@ -19,16 +24,21 @@ const SCORE_REVEAL_DELAY_MS = 250;
 const SCORE_FRAME_COUNT = 20;
 const SCORE_FRAME_DELAY_MS = 30;
 const POST_SCORE_DELAY_MS = 300;
-const TARGET_SCORE = 42;
+const TARGET_SCORE = 23;
 const SCORE_BAR_WIDTH_MOBILE = 15;
 const SCORE_BAR_WIDTH_DESKTOP = 30;
-const TOTAL_ISSUE_COUNT = 36;
-const TOTAL_SOURCE_FILE_COUNT = 42;
-const AFFECTED_FILE_COUNT = 18;
-const ELAPSED_TIME = "2.1s";
+const TOTAL_ISSUE_COUNT = 21;
+const TOTAL_SOURCE_FILE_COUNT = 2;
+const AFFECTED_FILE_COUNT = 2;
+const ELAPSED_TIME = "7.0s";
 
-const ANIMATION_COMPLETED_KEY = "react-doctor-animation-completed";
+const ANIMATION_COMPLETED_KEY = "react-doctor-reactlynx-animation-completed";
+// Primary CTA points at the canonical upstream project. The fork is the
+// extension's home; the upstream is the home of react-doctor itself.
 const GITHUB_URL = "https://github.com/millionco/react-doctor";
+const EXTENSION_FORK_URL =
+  "https://github.com/Huxpro/react-doctor/tree/reactlynx-support";
+const UPSTREAM_SITE_URL = "https://react.doctor";
 const GITHUB_ICON_PATH =
   "M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z";
 
@@ -43,44 +53,60 @@ interface RuleDiagnostic {
 
 const DIAGNOSTICS: RuleDiagnostic[] = [
   {
-    ruleKey: "react-doctor/no-derived-state-effect",
+    ruleKey: "react-doctor/rl-no-async-in-main-thread",
     severity: "error",
-    message: "Derived state computed in useEffect, compute during render instead",
-    help: "Derive values directly in the render body, or use useMemo for expensive computations.",
-    count: 5,
-    location: "src/components/Dashboard.tsx:42",
+    message: "`await` is not available inside a `'main thread'` function — there's no microtask scheduler on the main thread.",
+    help: "Drop the directive so the function runs on the background thread, or wrap async work in `runOnBackground(() => { ... })`.",
+    count: 3,
+    location: "src/app.tsx:14",
   },
   {
-    ruleKey: "react-doctor/no-server-action-auth",
+    ruleKey: "react-doctor/rl-main-thread-directive",
     severity: "error",
-    message: 'Server action "deleteUser" missing authentication check',
-    help: "Add an authentication check at the top of every server action.",
+    message: "Main-thread closure over a background-thread state setter — `setCount` was produced by `useState`, calling it from a `'main thread'` function is a silent no-op.",
+    help: "Wrap the setter call: `runOnBackground(() => setCount(...))`.",
+    count: 1,
+    location: "src/app.tsx:9",
+  },
+  {
+    ruleKey: "react-doctor/rl-prefer-main-thread-ref",
+    severity: "error",
+    message: "`useRef` inside a `'main thread'` function reads from the background thread — the ref never reflects main-thread state.",
+    help: "Use `useMainThreadRef` from `@lynx-js/react` instead.",
+    count: 1,
+    location: "src/app.tsx:10",
+  },
+  {
+    ruleKey: "react-doctor/rl-no-dom-globals",
+    severity: "error",
+    message: "`window` / `document` / `localStorage` / `navigator` are undefined under Lynx — first access crashes.",
+    help: "Use platform-appropriate APIs from `@lynx-js/react` instead of DOM globals.",
+    count: 3,
+    location: "src/app.tsx:24",
+  },
+  {
+    ruleKey: "react-doctor/rl-no-onclick-on-builtin",
+    severity: "error",
+    message: "`onClick` on Lynx built-in element `<text>` — host elements use `bindtap` / `catchtap`, the handler never fires.",
+    help: "Replace `onClick={...}` with `bindtap={...}` (bubbling) or `catchtap={...}` (stopped).",
     count: 2,
-    location: "src/app/actions/users.ts:18",
+    location: "src/app.tsx:30",
   },
   {
-    ruleKey: "react/no-array-index-key",
+    ruleKey: "react-doctor/rl-engine-versions-mismatch",
     severity: "error",
-    message: "Array index used as key, causes bugs when items are reordered",
-    help: "Use a unique, stable identifier from each item as the key prop.",
-    count: 12,
-    location: "src/components/TodoList.tsx:24",
+    message: "Incomplete ReactLynx install: `@lynx-js/react` is present but `@lynx-js/rspeedy`, `@lynx-js/react-rsbuild-plugin` are missing — the three engine packages ship in lockstep.",
+    help: "Add the missing packages to your manifest at compatible versions.",
+    count: 1,
+    location: "package.json",
   },
   {
-    ruleKey: "react-doctor/no-render-in-render",
+    ruleKey: "react-doctor/rl-no-reactlynx-2-residue",
     severity: "error",
-    message: 'Component "UserCard" inside "Dashboard", destroys state every render',
-    help: "Move the inner component to a separate file or to the module scope.",
-    count: 4,
-    location: "src/components/Dashboard.tsx:56",
-  },
-  {
-    ruleKey: "react-doctor/no-fetch-in-effect",
-    severity: "error",
-    message: "Data fetched in useEffect without cleanup, causes race conditions",
-    help: "Use a data-fetching library or add an AbortController for cleanup.",
-    count: 8,
-    location: "src/components/Profile.tsx:22",
+    message: "ReactLynx 2 residue detected (`lepus.js`, `card.json`, `lynx-speedy`) — RL2 → RL3 was a hard break.",
+    help: "Run the `migrax-planner-rl3` skill to migrate to ReactLynx 3 (`@lynx-js/react` + Rspeedy).",
+    count: 3,
+    location: "lepus.js · card.json · package.json",
   },
 ];
 
@@ -155,6 +181,12 @@ const ScoreHeader = ({ score }: { score: number }) => {
         </div>
         <div>
           React Doctor <span className="text-neutral-500">(https://react.doctor)</span>
+        </div>
+        <div className="text-neutral-500">
+          ReactLynx extension{" "}
+          <span className="text-neutral-600">
+            (https://huxpro.github.io/react-doctor)
+          </span>
         </div>
       </div>
     </div>
@@ -333,6 +365,28 @@ const Terminal = () => {
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-3xl bg-[#0a0a0a] p-6 pb-32 font-mono text-base leading-relaxed text-neutral-300 sm:p-8 sm:pb-40 sm:text-lg">
+      <div className="-mx-6 mb-6 flex flex-wrap items-center justify-between gap-2 border-b border-white/10 px-6 pb-3 text-xs text-neutral-500 sm:-mx-8 sm:px-8">
+        <div>
+          <span className="text-[#38ACDD]">✦ ReactLynx extension</span>{" "}
+          <span className="text-neutral-600">of</span>{" "}
+          <a
+            href={UPSTREAM_SITE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-neutral-400 underline-offset-2 hover:text-white hover:underline"
+          >
+            react.doctor →
+          </a>
+        </div>
+        <a
+          href={EXTENSION_FORK_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-neutral-500 underline-offset-2 hover:text-white hover:underline"
+        >
+          source
+        </a>
+      </div>
       <div>
         <span className="text-neutral-500">$ </span>
         <span>{state.typedCommand}</span>
@@ -343,12 +397,29 @@ const Terminal = () => {
         <FadeIn>
           <Spacer />
           <div className="flex items-center gap-2">
-            <Image src="/favicon.svg" alt="React Doctor" width={24} height={24} unoptimized />
+            <Image src={FAVICON_URL} alt="React Doctor" width={24} height={24} unoptimized />
             react-doctor
           </div>
           <div className="text-neutral-500">Your agent writes bad React, this catches it.</div>
           <Spacer />
-          <div className="text-neutral-500">Works with Next.js, Vite, and React Native.</div>
+          <div className="text-neutral-500">
+            Works with Next.js, Vite, and React Native.
+          </div>
+          <div className="text-neutral-500">
+            <span className="text-[#38ACDD]">+ ReactLynx</span>{" "}
+            <span className="text-neutral-600">
+              (this site — see{" "}
+              <a
+                href="https://react.doctor"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline-offset-2 hover:underline"
+              >
+                react.doctor
+              </a>{" "}
+              for the canonical project)
+            </span>
+          </div>
           <Spacer />
         </FadeIn>
       )}
@@ -398,7 +469,15 @@ const Terminal = () => {
               <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
                 <path fillRule="evenodd" clipRule="evenodd" d={GITHUB_ICON_PATH} />
               </svg>
-              Star on GitHub
+              Star react-doctor
+            </a>
+            <a
+              href={EXTENSION_FORK_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap border border-white/20 px-3 py-1.5 text-neutral-300 transition-colors hover:bg-white/5 hover:text-white"
+            >
+              ✦ ReactLynx extension →
             </a>
           </div>
         </FadeIn>

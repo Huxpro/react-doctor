@@ -15,6 +15,8 @@ Works for all React frameworks and libraries - Next.js, Vite, TanStack, React Na
 
 [Website →](https://react.doctor/docs)
 
+> _Extension branch._ This `reactlynx-support` branch adds a layer of [ReactLynx](https://lynxjs.org)-specific checks on top of upstream react-doctor — see [ReactLynx extension](#reactlynx-extension) below. Everything else is upstream; for the canonical project go to [react.doctor](https://react.doctor) / [millionco/react-doctor](https://github.com/millionco/react-doctor).
+
 ## Install
 
 ### 1. Quick start
@@ -100,6 +102,30 @@ Prefer JSON? Use `doctor.config.json`:
 }
 ```
 
+## ReactLynx extension
+
+Everything above is upstream react-doctor. This section is the extension this branch adds: first-class detection, lint rules, and project-level checks for [ReactLynx](https://lynxjs.org) — React semantics on a dual-thread runtime, no DOM, custom host elements like `<view>` and `<text>`.
+
+It auto-engages when `@lynx-js/react` is found. The extension adds 7 ReactLynx-specific checks (`rl-*`) and silences 36 DOM-/ARIA-only rules that would false-positive on Lynx host elements. Mixed monorepos work — `apps/lynx` gets the ReactLynx rules; web siblings keep the React-DOM rules.
+
+```bash
+npx react-doctor@latest
+# → framework: reactlynx · hasReactLynxWorkspace: true
+# → no false positives on bindtap, <view>, or the dual-thread runtime
+```
+
+What the `rl-*` rules catch — things React tooling can't see but Lynx crashes on:
+
+- `setX(...)` from a `'main thread'` closure — silent no-op, state lives on background thread
+- `useRef` from a `'main thread'` function — returns a background-thread ref
+- `async` / `await` / `new Promise(...)` inside `'main thread'` code — no microtask scheduler
+- `window`, `document`, `localStorage`, `navigator` — undefined under Lynx
+- `onClick` on a Lynx built-in element — use `bindtap` / `catchtap`
+- A partially-installed `@lynx-js/*` engine trio — must ship in lockstep
+- ReactLynx 2 residue — `lepus.js`, `card.json`, `lynx-speedy` deps
+
+Full rule list with good/bad samples → [`docs/REACTLYNX_RULES.md`](../../docs/REACTLYNX_RULES.md). Design narrative (M0–M6 milestones, harness-engineering notes) → [`tasks/prd-reactlynx-checks.md`](../../tasks/prd-reactlynx-checks.md). Hackathon deck for this extension → [`docs/hackathon-presentation/`](../../docs/hackathon-presentation/).
+
 ## Telemetry
 
 The CLI reports crashes, basic run traces, and anonymous usage counters to [Sentry](https://sentry.io/) to help us fix bugs and prioritize work.
@@ -116,6 +142,6 @@ To opt out, run: `npx react-doctor@latest --no-telemetry`
 
 ## Contributing
 
-[Issues welcome!](https://github.com/millionco/react-doctor/issues)
+[Issues welcome!](https://github.com/millionco/react-doctor/issues) — upstream is the canonical project. For issues specific to the ReactLynx extension on this branch, see [Huxpro/react-doctor/issues](https://github.com/Huxpro/react-doctor/issues).
 
 MIT-licensed

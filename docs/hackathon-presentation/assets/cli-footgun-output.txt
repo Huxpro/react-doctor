@@ -1,0 +1,212 @@
+[1mReact Doctor[22m [2mv0.2.18[22m
+
+[90m  [39m
+
+  [1mBugs[22m [2m›[22m [31m10 errors[39m
+  [1mPerformance[22m [2m›[22m [33m[2m2 warnings[22m[39m
+  [1mMaintainability[22m [2m›[22m [33m[2m5 warnings[22m[39m
+  [1mCorrectness[22m [2m›[22m [31m4 errors[39m
+
+  [31m21 issues[39m
+
+  [31m✖[39m [31mBugs: Hook called conditionally[39m
+[2m    → Call hooks at the top level of a React function component[22m
+[2m    or a custom Hook.[22m
+[90m    Curl with no cache & follow the canonical fix and false positive check recipe before fixing: https://react.doctor/docs/rules/react-doctor/rules-of-hooks[39m
+
+[90m    src/app.tsx:10[39m
+    [2m┌[22m[2m──────────────────────────────────────────────────────────────[22m[2m┐[22m
+    [2m│[22m [0m [90m  9 |[39m     setCount(count [33m+[39m [35m1[39m)[33m;[39m                              [2m│[22m
+    [2m│[22m [31m[1m>[22m[39m[90m 10 |[39m     [36mconst[39m r [33m=[39m useRef([36mnull[39m)[33m;[39m                           [2m│[22m
+    [2m│[22m  [90m    |[39m               [31m[1m^[22m[39m                                       [2m│[22m
+    [2m│[22m  [90m 11 |[39m     [36mreturn[39m r[33m;[39m[0m                                         [2m│[22m
+    [2m└[22m[2m──────────────────────────────────────────────────────────────[22m[2m┘[22m
+
+  [33m⚠[39m [33mPerformance: setState reads a stale value[39m
+[2m    → Use the callback form: `setState(prev => prev + 1)` to[22m
+[2m    always read the latest value[22m
+[90m    Curl with no cache & follow the canonical fix and false positive check recipe before fixing: https://react.doctor/docs/rules/react-doctor/rerender-functional-setstate[39m
+
+[90m    src/app.tsx:9[39m
+
+  [33m⚠[39m [33mMaintainability: deslop/unused-file[39m [90m×2[39m
+[2m    → Delete the file if it is truly unreachable, or import it[22m
+[2m    from an entry point.[22m
+
+[90m    lepus.js[39m
+
+[90m    src/app.tsx[39m
+
+  [33m⚠[39m [33mPerformance: State only used in handlers[39m
+[2m    → Use useRef instead of useState when the value is only set[22m
+[2m    and never shown on screen. `ref.current = ...` updates it[22m
+[2m    without redrawing the component.[22m
+[90m    Curl with no cache & follow the canonical fix and false positive check recipe before fixing: https://react.doctor/docs/rules/react-doctor/rerender-state-only-in-handlers[39m
+
+[90m    src/app.tsx:4[39m
+
+  [33m⚠[39m [33mMaintainability: Pure function rebuilt every render[39m [90m×2[39m
+[2m    → Move the function above the component, at the top of the[22m
+[2m    file. It doesn't use local state, so rebuilding it each[22m
+[2m    update is wasted work.[22m
+[90m    Curl with no cache & follow the canonical fix and false positive check recipe before fixing: https://react.doctor/docs/rules/react-doctor/prefer-module-scope-pure-function[39m
+
+[90m    src/app.tsx:14[39m
+
+[90m    src/app.tsx:20[39m
+
+  [33m⚠[39m [33mMaintainability: deslop/unused-dependency[39m
+[2m    → Remove the dependency from package.json if it is[22m
+[2m    genuinely unused.[22m
+
+[90m    package.json[39m
+
+  [31m✖[39m [31mCorrectness: react-doctor/rl-engine-versions-mismatch[39m
+[2m    → Add the missing packages (@lynx-js/rspeedy,[22m
+[2m    @lynx-js/react-rsbuild-plugin) to your manifest at a[22m
+[2m    version compatible with the installed @lynx-js/react.[22m
+
+[90m    package.json[39m
+
+  [31m✖[39m [31mCorrectness: react-doctor/rl-no-reactlynx-2-residue[39m [90m×3[39m
+[2m    → Open the `migrax-planner-rl3` skill in this repo and[22m
+[2m    follow the migration prompts. It walks you through the[22m
+[2m    package-manager detection, config migration, code[22m
+[2m    migration, and build verification end-to-end.[22m
+
+[90m    lepus.js[39m
+
+[90m    card.json[39m
+
+[90m    package.json[39m
+
+  [31m✖[39m [31mBugs: Background-thread state setter called from a `'main thread'` closure[39m
+[2m    → Wrap the setter call in `runOnBackground(() =>[22m
+[2m    setX(...))` so the React state update runs on the[22m
+[2m    background thread that owns it. If the call is genuinely[22m
+[2m    happening on the wrong thread by design, restructure so the[22m
+[2m    main-thread function calls a background-thread callback[22m
+[2m    instead of holding a direct setter reference.[22m
+[90m    Curl with no cache & follow the canonical fix and false positive check recipe before fixing: https://react.doctor/docs/rules/react-doctor/rl-main-thread-directive[39m
+
+[90m    src/app.tsx:9[39m
+    [2m┌[22m[2m──────────────────────────────────────────────────────────────[22m[2m┐[22m
+    [2m│[22m [0m [90m  8 |[39m     [32m"main thread"[39m[33m;[39m                                    [2m│[22m
+    [2m│[22m [31m[1m>[22m[39m[90m  9 |[39m     setCount(count [33m+[39m [35m1[39m)[33m;[39m                              [2m│[22m
+    [2m│[22m  [90m    |[39m     [31m[1m^[22m[39m                                                 [2m│[22m
+    [2m│[22m  [90m 10 |[39m     [36mconst[39m r [33m=[39m useRef([36mnull[39m)[33m;[39m[0m                           [2m│[22m
+    [2m└[22m[2m──────────────────────────────────────────────────────────────[22m[2m┘[22m
+
+  [31m✖[39m [31mBugs: Use `useMainThreadRef` instead of `useRef` in main-thread code[39m
+[2m    → Switch the `useRef` call to `useMainThreadRef` imported[22m
+[2m    from `@lynx-js/react`. The returned `MainThreadRef` exposes[22m
+[2m    the same `.current` API but is initialised and read on the[22m
+[2m    main thread, matching the lifetime of the `'main[22m
+[2m    thread'`-tagged function that owns it. If you actually need[22m
+[2m    a background-thread ref inside a main-thread closure, wrap[22m
+[2m    the call: `runOnBackground(() => useRef(...))`.[22m
+[90m    Curl with no cache & follow the canonical fix and false positive check recipe before fixing: https://react.doctor/docs/rules/react-doctor/rl-prefer-main-thread-ref[39m
+
+[90m    src/app.tsx:10[39m
+    [2m┌[22m[2m──────────────────────────────────────────────────────────────[22m[2m┐[22m
+    [2m│[22m [0m [90m  9 |[39m     setCount(count [33m+[39m [35m1[39m)[33m;[39m                              [2m│[22m
+    [2m│[22m [31m[1m>[22m[39m[90m 10 |[39m     [36mconst[39m r [33m=[39m useRef([36mnull[39m)[33m;[39m                           [2m│[22m
+    [2m│[22m  [90m    |[39m               [31m[1m^[22m[39m                                       [2m│[22m
+    [2m│[22m  [90m 11 |[39m     [36mreturn[39m r[33m;[39m[0m                                         [2m│[22m
+    [2m└[22m[2m──────────────────────────────────────────────────────────────[22m[2m┘[22m
+
+  [31m✖[39m [31mBugs: No async work in `'main thread'` functions[39m [90m×3[39m
+[2m    → The `'main thread'` directive opts a function into[22m
+[2m    ReactLynx's main-thread runtime, which has no microtask[22m
+[2m    scheduler. Remove the `async` modifier, the `await`[22m
+[2m    expression, or the `new Promise(...)` call — and if you[22m
+[2m    genuinely need async work, drop the directive (so the[22m
+[2m    function runs on the background thread) or call[22m
+[2m    `runOnBackground(() => { /* async stuff */ })` from the[22m
+[2m    main-thread body.[22m
+[90m    Curl with no cache & follow the canonical fix and false positive check recipe before fixing: https://react.doctor/docs/rules/react-doctor/rl-no-async-in-main-thread[39m
+
+[90m    src/app.tsx:14-17[39m
+    [2m┌[22m[2m──────────────────────────────────────────────────────────────[22m[2m┐[22m
+    [2m│[22m [0m [90m 13 |[39m                                                       [2m│[22m
+    [2m│[22m [31m[1m>[22m[39m[90m 14 |[39m   [36masync[39m [36mfunction[39m badMt() {                            [2m│[22m
+    [2m│[22m [31m[1m>[22m[39m[90m 15 |[39m     [32m"main thread"[39m[33m;[39m                                    [2m│[22m
+    [2m│[22m [31m[1m>[22m[39m[90m 16 |[39m     [36mawait[39m fetch([32m"/api"[39m)[33m;[39m                              [2m│[22m
+    [2m│[22m [31m[1m>[22m[39m[90m 17 |[39m     [36mreturn[39m [36mnew[39m [33mPromise[39m((r) [33m=>[39m r([35m1[39m))[33m;[39m                  [2m│[22m
+    [2m│[22m  [90m 18 |[39m   }[0m                                                   [2m│[22m
+    [2m└[22m[2m──────────────────────────────────────────────────────────────[22m[2m┘[22m
+
+  [31m✖[39m [31mBugs: Web globals unavailable in ReactLynx[39m [90m×2[39m
+[2m    → ReactLynx runs on a non-DOM runtime, so `window`,[22m
+[2m    `document`, `localStorage`, `sessionStorage`, and[22m
+[2m    `navigator` throw `ReferenceError` at runtime. Replace them[22m
+[2m    with the equivalent `lynx.*` APIs (e.g.[22m
+[2m    `lynx.getSystemInfo()` for environment info,[22m
+[2m    `lynx.getStorage` / `lynx.setStorage` for persistent[22m
+[2m    storage).[22m
+[90m    Curl with no cache & follow the canonical fix and false positive check recipe before fixing: https://react.doctor/docs/rules/react-doctor/rl-no-dom-globals[39m
+
+[90m    src/app.tsx:26-28[39m
+    [2m┌[22m[2m──────────────────────────────────────────────────────────────[22m[2m┐[22m
+    [2m│[22m [0m [90m 25 |[39m   [36mif[39m ([36mtypeof[39m window [33m!==[39m [32m"undefined"[39m) {                [2m│[22m
+    [2m│[22m [31m[1m>[22m[39m[90m 26 |[39m     document[33m.[39mtitle [33m=[39m [32m"hi"[39m[33m;[39m                            [2m│[22m
+    [2m│[22m [31m[1m>[22m[39m[90m 27 |[39m   }                                                   [2m│[22m
+    [2m│[22m [31m[1m>[22m[39m[90m 28 |[39m   localStorage[33m.[39msetItem([32m"k"[39m[33m,[39m [32m"v"[39m)[33m;[39m                     [2m│[22m
+    [2m│[22m  [90m 29 |[39m[0m                                                       [2m│[22m
+    [2m└[22m[2m──────────────────────────────────────────────────────────────[22m[2m┘[22m
+
+  [31m✖[39m [31mBugs: `onClick` on Lynx host element is a no-op[39m [90m×2[39m
+[2m    → Replace `onClick` with `bindtap` on the Lynx host[22m
+[2m    element. Use `catchtap` instead when you need to stop the[22m
+[2m    tap from bubbling to an ancestor handler (e.g. an enclosing[22m
+[2m    `<scroll-view>` or long-press parent).[22m
+[90m    Curl with no cache & follow the canonical fix and false positive check recipe before fixing: https://react.doctor/docs/rules/react-doctor/rl-no-onclick-on-builtin[39m
+
+[90m    src/app.tsx:32-33[39m
+    [2m┌[22m[2m──────────────────────────────────────────────────────────────[22m[2m┐[22m
+    [2m│[22m [0m [90m 31 |[39m     [33m<[39m[33mview[39m[33m>[39m                                            [2m│[22m
+    [2m│[22m [31m[1m>[22m[39m[90m 32 |[39m       [33m<[39m[33mtext[39m onClick[33m=[39m{handle}[33m>[39mtap me[33m<[39m[33m/[39m[33mtext[39m[33m>[39m            [2m│[22m
+    [2m│[22m [31m[1m>[22m[39m[90m 33 |[39m       [33m<[39m[33mscroll[39m[33m-[39mview onClick[33m=[39m{badMt}[33m>[39mscroll[33m<[39m[33m/[39m[33mscroll[39m[33m-[39mvi[0m… [2m│[22m
+    [2m│[22m  [90m 34 |[39m     [33m<[39m[33m/[39m[33mview[39m[33m>[39m[0m                                           [2m│[22m
+    [2m└[22m[2m──────────────────────────────────────────────────────────────[22m[2m┘[22m
+
+[1mAgent guidance[22m
+[90m  - Treat React Doctor diagnostics as starting hypotheses. Read the relevant code before confirming or suppressing each finding.[39m
+[90m  - For each group, decide true positive, false positive, or needs-human-review, then assign high/medium/low confidence.[39m
+[90m  - Do not suppress a finding without evidence from the file in question. Confidence requires code context.[39m
+[90m  - Understand the root cause before editing. Fix the underlying code instead of changing react-doctor config or suppressing rules unless explicitly asked.[39m
+[90m  - Investigate deeply where relevant: race conditions, security-sensitive flows, state propagation, multi-file refactors, and downstream dependency chains.[39m
+[90m  - Ignore pure style preferences, theoretical issues without real impact, missing features, and unrelated pre-existing code.[39m
+[90m  - Start with high-confidence fixes that preserve behavior. Leave low-confidence or product-dependent changes as notes.[39m
+[90m  - Run `npx react-doctor@latest --verbose --diff` before and after changes, plus relevant tests after each focused batch.[39m
+[90m  - When available, spawn subagents or isolated worktrees for independent rule families, then review and merge only the best safe fixes.[39m
+[90m  - Split unrelated, broad, or behavior-changing work into separate PRs/branches instead of one large cleanup.[39m
+[90m  - For confirmed issues that cannot be fixed now, create GitHub issues with the rule, file/line, confidence, impact, and proposed fix.[39m
+[90m  - If a fix needs an API, UX, or architecture decision, stop and ask before editing.[39m
+
+  [31m┌─────┐[39m  [31m0[39m [2m/ 100[22m [31mCritical[39m
+  [31m│ x x │[39m  [31m[39m[2m[31m▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓[39m[22m[2m░░░░░░░░░░░░░░░░░[22m
+  [31m│  ▽  │[39m  React Doctor [2m(https://react.doctor)[22m
+  [31m└─────┘[39m
+
+[90m  You could improve [39m[33m+66%[39m[90m by fixing the top 3 issues[39m
+[90m  Full diagnostics written to /var/folders/6d/hff_8tfd2qd94xs1r4jpbzwc0000gn/T/react-doctor-f92033ad-b6bc-4449-b993-81d6b408f0b5[39m
+
+[2m  ────────────────────────────────────────────────────────────[22m
+
+  [1mShare:[22m [36mhttps://react.doctor/share?p=reactlynx-footgun-demo&s=0&e=14&w=7&f=4[39m
+[2m  Tell others how you did on socials[22m
+
+  [1mDocs:[22m [36mhttps://react.doctor/docs[39m
+[2m  Learn more about fixing issues, setting up CI/CD, and configuring rules with a config file[22m
+
+  [1mGitHub:[22m [36mhttps://github.com/millionco/react-doctor[39m
+[2m  Report issues and star the repository![22m
+
+
+React Doctor is not installed in this project.
+Ask the user if they would like to set it up, then run:
+
+  npx react-doctor install --yes
+
+This adds agent skill files, a `doctor` package script, and react-doctor as a dev dependency.
