@@ -378,14 +378,22 @@ const Terminal = () => {
             react.doctor →
           </a>
         </div>
-        <a
-          href={EXTENSION_FORK_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-neutral-500 underline-offset-2 hover:text-white hover:underline"
-        >
-          source
-        </a>
+        <div className="flex items-center gap-4">
+          <a
+            href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/rules/`}
+            className="text-neutral-500 underline-offset-2 hover:text-white hover:underline"
+          >
+            rules
+          </a>
+          <a
+            href={EXTENSION_FORK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-neutral-500 underline-offset-2 hover:text-white hover:underline"
+          >
+            source
+          </a>
+        </div>
       </div>
       <div>
         <span className="text-neutral-500">$ </span>

@@ -124,7 +124,7 @@ What the `rl-*` rules catch — things React tooling can't see but Lynx crashes 
 - A partially-installed `@lynx-js/*` engine trio — must ship in lockstep
 - ReactLynx 2 residue — `lepus.js`, `card.json`, `lynx-speedy` deps
 
-Full rule list with good/bad samples → [`docs/REACTLYNX_RULES.md`](../../docs/REACTLYNX_RULES.md). Design narrative (M0–M6 milestones, harness-engineering notes) → [`tasks/prd-reactlynx-checks.md`](../../tasks/prd-reactlynx-checks.md). Hackathon deck for this extension → [`docs/hackathon-presentation/`](../../docs/hackathon-presentation/).
+Full rule list with good/bad samples → [`huxpro.github.io/react-doctor/rules`](https://huxpro.github.io/react-doctor/rules/) (full reference incl. the static-vs-skills appendix in [`docs/REACTLYNX_RULES.md`](https://github.com/Huxpro/react-doctor/blob/reactlynx-support/docs/REACTLYNX_RULES.md)). Design narrative (M0–M6 milestones, harness-engineering notes) → [`tasks/prd-reactlynx-checks.md`](https://github.com/Huxpro/react-doctor/blob/reactlynx-support/tasks/prd-reactlynx-checks.md). Hackathon deck for this extension → [`huxpro.github.io/react-doctor/deck`](https://huxpro.github.io/react-doctor/deck/).
 
 ## Telemetry
 
