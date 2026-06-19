@@ -7,7 +7,17 @@ import { Copy, Check, ChevronRight, RotateCcw } from "lucide-react";
 // next/image with `images.unoptimized: true` does not auto-prepend
 // the configured `basePath` to absolute src URLs, so the favicon would
 // 404 under GitHub Pages. Build the asset URL by hand.
-const FAVICON_URL = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/favicon.svg`;
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const FAVICON_URL = `${BASE_PATH}/favicon.svg`;
+const RULES_INDEX_URL = `${BASE_PATH}/rules/`;
+
+// Diagnostic rule keys look like `react-doctor/rl-no-async-in-main-thread`;
+// /rules anchors are the bare slug (`#rl-no-async-in-main-thread`). Strip
+// the namespace, fall back to the whole key when there's no slash.
+const ruleAnchorUrl = (ruleKey: string): string => {
+  const slug = ruleKey.includes("/") ? ruleKey.slice(ruleKey.indexOf("/") + 1) : ruleKey;
+  return `${RULES_INDEX_URL}#${slug}`;
+};
 import { PERFECT_SCORE, RUN_COMMAND } from "@/constants";
 import { getDoctorFace } from "@/utils/get-doctor-face";
 import { getScoreColorClass } from "@/utils/get-score-color-class";
@@ -198,9 +208,11 @@ const DiagnosticItem = ({ diagnostic }: { diagnostic: RuleDiagnostic }) => {
   const colorClass = diagnostic.severity === "error" ? "text-red-400" : "text-yellow-500";
   const icon = diagnostic.severity === "error" ? "✗" : "⚠";
   const countBadge = diagnostic.count > 1 ? `×${diagnostic.count}` : "";
+  const ruleHref = ruleAnchorUrl(diagnostic.ruleKey);
 
   return (
     <div className="mb-1">
+      <span className="inline-flex items-start gap-1">
       <button
         onClick={() => setIsOpen((previous) => !previous)}
         className="inline-flex items-start gap-1 text-left"
@@ -215,6 +227,15 @@ const DiagnosticItem = ({ diagnostic }: { diagnostic: RuleDiagnostic }) => {
           {countBadge && <span className="text-neutral-500">{`\u00A0${countBadge}`}</span>}
         </span>
       </button>
+      <a
+        href={ruleHref}
+        aria-label={`Open rule reference for ${diagnostic.ruleKey}`}
+        title="Open rule reference"
+        className="ml-1 mt-[0.35em] shrink-0 text-neutral-600 transition-colors hover:text-[#38ACDD]"
+      >
+        {"\u2197"}
+      </a>
+      </span>
       <div
         className="ml-6 grid text-neutral-500 transition-[grid-template-rows,opacity] duration-200 ease-out"
         style={{
@@ -227,6 +248,14 @@ const DiagnosticItem = ({ diagnostic }: { diagnostic: RuleDiagnostic }) => {
             <div>{diagnostic.message}</div>
             <div>→ {diagnostic.help}</div>
             <div>{diagnostic.location}</div>
+            <div className="mt-1">
+              <a
+                href={ruleHref}
+                className="text-neutral-400 underline-offset-2 hover:text-[#38ACDD] hover:underline"
+              >
+                View rule reference →
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -457,6 +486,15 @@ const Terminal = () => {
             <span className="text-neutral-500">
               {`  across ${AFFECTED_FILE_COUNT}/${TOTAL_SOURCE_FILE_COUNT} files  in ${ELAPSED_TIME}`}
             </span>
+          </div>
+          <div className="mt-1 text-neutral-500">
+            {"  "}
+            <a
+              href={RULES_INDEX_URL}
+              className="text-neutral-400 underline-offset-2 hover:text-[#38ACDD] hover:underline"
+            >
+              Browse all 8 ReactLynx rules →
+            </a>
           </div>
           <Spacer />
         </FadeIn>
